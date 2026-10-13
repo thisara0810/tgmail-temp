@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      # Port 25: Public Inbound SMTP mail transfer
+      - "25:25"
+      # Port 4000: Internal REST API & SSE
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - SMTP_PORT=25
+      - DOMAIN=tgmail.com
+      - CLIENT_ORIGIN=https://tgmail.com
+      - NODE_ENV=production
+      - ADDRESS_TTL_SECONDS=1800
+      - COOKIE_SECRET=generate-a-secure-secret-key-32-chars-long
+    networks:
+      - tgmail-net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      # Port 80: HTTP web traffic (behind VPS reverse proxy or Caddy/Nginx)
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - tgmail-net
+
+networks:
+  tgmail-net:
+    driver: bridge

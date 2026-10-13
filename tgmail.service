@@ -1,0 +1,25 @@
+[Unit]
+Description=TGMail Temp Backend & Inbound SMTP Agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/tgmail/server
+Environment=NODE_ENV=production
+Environment=PORT=4000
+Environment=SMTP_PORT=25
+Environment=DOMAIN=tgmail.com
+Environment=CLIENT_ORIGIN=https://tgmail.com
+Environment=ADDRESS_TTL_SECONDS=1800
+Environment=COOKIE_SECRET=change-this-to-a-very-secure-random-token-here
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+# Enable binding to privileged port 25 if run as non-root:
+# AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
